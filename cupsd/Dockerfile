@@ -1,7 +1,4 @@
-ARG BASE_USER
-ARG MAINTAINER
-FROM ${BASE_USER}/debian:testing
-MAINTAINER $MAINTAINER
+FROM debian:stable-slim
 
 # Install Packages (basic tools, cups, basic drivers, HP drivers)
 RUN apt-get update \
@@ -14,14 +11,16 @@ RUN apt-get update \
   cups-filters \
   foomatic-db-compressed-ppds \
   printer-driver-all \
-  openprinting-ppds \
-  hpijs-ppds \
-  hp-ppd \
-  hplip \
   smbclient \
   printer-driver-cups-pdf \
 && apt-get clean \
 && rm -rf /var/lib/apt/lists/*
+
+# Install brother driver
+RUN ln -s /etc/init.d/cupsys /etc/init.d/lpd && mkdir /tmp/driver
+COPY files/brgenml1cupswrapper-3.1.0-1.i386.deb /tmp/driver
+COPY files/brgenml1lpr-3.1.0-1.i386.deb /tmp/driver
+RUN dpkg -i --force-all /tmp/driver/brgenml1lpr-3.1.0-1.i386.deb && dpkg -i --force-all /tmp/driver/brgenml1cupswrapper-3.1.0-1.i386.deb && dpkg -l | grep Brother | rm /tmp/driver/*.deb
 
 # Add user and disable sudo password checking
 RUN useradd \
