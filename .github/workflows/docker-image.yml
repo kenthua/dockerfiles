@@ -1,0 +1,28 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ dcp7065dn ]
+  pull_request:
+    branches: [ dcp7065dn ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Create files folder
+      working-directory: cupsd
+      run: mkdir files
+    - name: Pull file 1
+      working-directory: cupsd
+      run: wget -P files https://download.brother.com/welcome/dlf101125/brgenml1cupswrapper-3.1.0-1.i386.deb
+    - name: Pull file 2
+      working-directory: cupsd
+      run: wget -P files https://download.brother.com/welcome/dlf101123/brgenml1lpr-3.1.0-1.i386.deb
+    - name: Build the Docker image
+      working-directory: cupsd
+      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
