@@ -27,12 +27,14 @@ jobs:
       run: wget -P files https://download.brother.com/welcome/dlf101123/brgenml1lpr-3.1.0-1.i386.deb
     - name: Build the Docker image
       working-directory: cupsd
-      run: docker build . --file Dockerfile --tag ${{ IMAGE_NAME }}
+      run: docker build . --file Dockerfile --tag ${{ jobs.build.env.IMAGE_NAME }}
     - name: Log into GitHub Container Registry
     # TODO: Create a PAT with `read:packages` and `write:packages` scopes and save it as an Actions secret `CR_PAT`
       run: echo "${{ secrets.CR_PAT }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
 
     - name: Push image to GitHub Container Registry
+      env:
+        IMAGE_NAME: ${{ jobs.build.env.IMAGE_NAME }}
       run: |
         IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
 
